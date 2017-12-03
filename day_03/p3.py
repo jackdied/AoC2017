@@ -46,21 +46,19 @@ def make_grid(n):
         grid[y][x] = v
     return grid
 
-def make_moves(n):
+def make_moves():
     pos = 0, 0
     curr = 1
     nextdir_it = it.cycle(directions()) # loop forever on 4 direcctions
     move_counts = yield_twice()
     yield pos, curr
     curr += 1
-    while curr < n:
+    while True:
         move_dir = next(nextdir_it)
         move_count = next(move_counts)
         for _ in range(move_count):
             pos = move(pos, move_dir)
             yield pos, curr
-            if curr == n:
-                break
             curr += 1
 
 
@@ -69,8 +67,10 @@ tot_dx = tot_dy = 0
 
 def calc_dist(n):
     tpos = [0, 0]
-    for pos, v in make_moves(n):
+    for pos, v in make_moves():
         tpos = pos
+        if v == n:
+            break
     return abs(tpos[0]) + abs(tpos[1])
 
 assert calc_dist(1) == 0
@@ -81,3 +81,19 @@ assert calc_dist(1024) == 31
 # 559 is not the answer, try lower
     
 print(calc_dist(input))
+
+
+def neighs(pos):
+    x, y = pos
+    yield x-1, y
+    yield x, y-1
+    yield x+1, y
+    yield x, y+1
+    yield x-1, x-1
+    yield x+1, y+1
+    yield x+1, y-1
+    yield x-1, y+1
+
+assert 8 == len(list(set(neighs((0, 0)))))
+
+
