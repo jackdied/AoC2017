@@ -32,3 +32,13 @@ for _ in range(10):
 
 print("ANSWER", sum(map(row_value, input.split('\n'))))
     
+def star2_value(nums):
+    nums = sorted(nums)
+    while nums:
+        test = nums.pop(0)
+        for other in nums:
+            if other % test == 0:
+                return other // test
+
+rows = [map(int, line.split(' ')) for line in input.split('\n')]
+print("ANSWER2", sum(map(star2_value, rows)))
