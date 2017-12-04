@@ -21,55 +21,24 @@ def yield_twice():
         yield curr
         curr += 1
 
-def make_spiral(n, start=(0,0)):
-    pos = start
-    curr = 0
-    nextdir_it = it.cycle(directions()) # loop forever on 4 direcctions
-    move_counts = yield_twice()
-    yield pos, curr
-    curr += 1
-    while curr < n:
-        move_dir = next(nextdir_it)
-        move_count = next(move_counts)
-        for _ in range(move_count):
-            #print("MOVE", move_count, move_dir, pos)
-            pos = move(pos, move_dir)
-            yield pos, curr
-            curr += 1
-
-def make_grid(n):
-    width = height = n
-    grid = [[0 for x in range(width)] for y in range(height)]
-    pairs = list(make_spiral(n, (width//2, height//2)))
-    #print("PAIRS", pairs)
-    for (x,y),v in pairs:
-        grid[y][x] = v
-    return grid
-
 def make_moves():
     pos = 0, 0
-    curr = 1
     nextdir_it = it.cycle(directions()) # loop forever on 4 direcctions
     move_counts = yield_twice()
-    yield pos, curr
-    curr += 1
+    yield pos
     while True:
-        move_dir = next(nextdir_it)
-        move_count = next(move_counts)
-        for _ in range(move_count):
+        for move_dir in it.repeat(next(nextdir_it),  next(move_counts)):
             pos = move(pos, move_dir)
-            yield pos, curr
-            curr += 1
-
+            yield pos
 
 input = 312051
 tot_dx = tot_dy = 0
 
 def calc_dist(n):
-    tpos = [0, 0]
-    for pos, v in make_moves():
+    tpos = (0, 0)
+    for i, pos in enumerate(make_moves(), start=1):
         tpos = pos
-        if v == n:
+        if i == n:
             break
     return abs(tpos[0]) + abs(tpos[1])
 
@@ -89,11 +58,36 @@ def neighs(pos):
     yield x, y-1
     yield x+1, y
     yield x, y+1
-    yield x-1, x-1
+    yield x-1, y-1
     yield x+1, y+1
     yield x+1, y-1
     yield x-1, y+1
 
 assert 8 == len(list(set(neighs((0, 0)))))
 
+from collections import defaultdict
 
+def star2(at_least=1):
+    cellvals = defaultdict(int)
+    move_it = enumerate(make_moves(), start=1)
+    i, pos = next(move_it)
+    while True:
+        if pos == (0, 0):  # first one is special
+            score = 1
+        else:
+            score = sum(cellvals[p] for p in neighs(pos))
+            #print("VALS", {k:v for (k,v) in cellvals.items() if v})
+            #print("SUM", i, pos, [cellvals[p] for p in neighs(pos)], list(neighs(pos)))
+        if score >= at_least:
+            return i, score
+        cellvals[pos] = score
+        i, pos = next(move_it)
+
+
+assert star2(1)[0] == 1, star2(1)
+assert star2(2)[0] == 3, star2(2)
+assert star2(3)[0] == 4, star2(3)
+assert star2(4)[0] == 4, star2(3)
+assert star2(5)[0] == 5, star2(3)
+
+print(star2(input))
