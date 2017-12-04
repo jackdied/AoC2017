@@ -1,5 +1,5 @@
 # AoC2017
-Advent of Code 2017
+Advent of Code 2017 [see http://adventofcode.com/]
 
 I do these quickly for the first pass (the only way to get leader board points) so please don't take that as an example of production code.
 
