@@ -5,56 +5,33 @@ from collections import deque
 inp = list(map(int, '46,41,212,83,1,255,157,65,139,52,39,254,2,86,0,204'.split(',')))
 ord_inp = list(map(ord, '46,41,212,83,1,255,157,65,139,52,39,254,2,86,0,204'))
 
-def star1(nums, lens):
-    nums = deque(nums)
+def transform(lens=[], start_nums=list(range(256))):
     curr = 0
     skip = 0
-    for l in lens:
-        new_nums = list(nums)
-        new_nums[:l] = new_nums[:l][::-1]
-        nums = deque(new_nums)
-        move = l + skip
+    nums = deque(start_nums)
+    total_rotates = 0
+    for clen in lens:
+        lnums = list(nums)
+        # reverse clen items, starting at curr
+        cp = list(nums)
+        cp[curr:clen] = cp[curr:clen][::-1]
+        nums = deque(cp)
+        # move the curr position forward by clen + skip
+        do_rotate = clen + skip
+        total_rotates += do_rotate
+        nums.rotate(-do_rotate)
+        # increment skip
         skip += 1
-        nums.rotate(-move)
-        curr = (curr + move) % len(nums)
-    nums.rotate(curr)
-    #return curr % len(nums), skip, nums
-    return nums[0] * nums[1]
-
-print(star1(range(5), [3, 4, 1, 5]))
-
-print(star1(range(256), inp)) # 52070
-
-
-def star2(txt, nums=list(range(256)), cycles=64):
-    nums = deque(nums)
-    lens = nums + [17, 31, 73, 47, 23]
-    curr = 0
-    skip = 0
-    for _ in range(cycles):
-        for l in lens:
-            new_nums = list(nums)
-            new_nums[:l] = new_nums[:l][::-1]
-            nums = deque(new_nums)
-            move = l + skip
-            skip += 1
-            nums.rotate(-move)
-            curr = (curr + move) % len(nums)
-        nums.rotate(curr)
+    # rotate like we were keeping track of curr
+    nums.rotate(-(len(nums) - total_rotates % len(nums)))
     return list(nums)
 
+# from the problem description
+assert transform([3, 4, 1, 5], [0, 1, 2, 3, 4]) == [3, 4, 2, 1, 0]
 
-def hashify(nums):
-    out = []
-    while nums:
-        sixteen = nums[:16]
-        nums[:16] = []
-        xored = sixteen[0]
-        for n in sixteen[1:]:
-            xored ^= n
-        out.append(xored)
-    return ''.join(hex(n)[-2:] for n in out)
+def score(nums):
+    return nums[0] * nums[1]
 
-print("DONE", hashify(star2(range(256), ord_inp)))
-        
-        
+# my original correct answer to star1, given my input
+assert 52070 == score(transform(inp))
+
